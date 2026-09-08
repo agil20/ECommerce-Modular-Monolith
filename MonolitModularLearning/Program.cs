@@ -9,6 +9,7 @@ using Modules.Categories.Extentions;
 using Modules.Categories.Infrastructure.Persistence;
 using Modules.Products.Application.Consumers;
 using Modules.Products.Application.Extentions;
+using Modules.Products.Infrastructure.Consumers;
 using Modules.Products.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -61,7 +62,20 @@ builder.Services.AddMassTransit(x =>
 {
     
     x.AddConsumer<ProductPriceChangedConsumer>();
+    x.AddConsumer<CategoryDeletedEventConsumer>();
+    x.AddEntityFrameworkOutbox<CategoriesDbContext>(o =>
+    {
+        // PostgreSQL bazasını istifadə edirik
+        o.UsePostgres();
 
+        // Mesajları cədvəldən oxuyub avtomatik RabbitMQ-ya göndərən "işçi" (worker)
+        o.UseBusOutbox();
+    });
+    x.AddEntityFrameworkOutbox<ProductsDbContext>(o =>
+    {
+        o.UsePostgres();
+        o.UseBusOutbox();
+    });
     x.UsingRabbitMq((context, cfg) =>
     {
         var configuration = context.GetRequiredService<IConfiguration>();

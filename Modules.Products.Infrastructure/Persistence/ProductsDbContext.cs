@@ -1,10 +1,9 @@
 ﻿using Common.Entites;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Modules.Products.Domain;
 using Modules.Products.Infrastructure.Persistence.Configurations;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
+
 
 namespace Modules.Products.Infrastructure.Persistence;
 
@@ -25,8 +24,12 @@ public class ProductsDbContext : DbContext
 
         modelBuilder.HasDefaultSchema("Products");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ProductConfiguration).Assembly);
-   
+        modelBuilder.AddInboxStateEntity();
+        modelBuilder.AddOutboxMessageEntity();
+        modelBuilder.AddOutboxStateEntity();
+
     }
+
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {

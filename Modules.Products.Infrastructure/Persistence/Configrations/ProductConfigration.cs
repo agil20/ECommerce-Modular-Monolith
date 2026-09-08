@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Modules.Products.Domain;
 using System;
+using System.Reflection.Emit;
 
 namespace Modules.Products.Infrastructure.Persistence.Configurations;
 
@@ -49,5 +50,6 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             new Product { Id = 108, Name = "Qaçış Trenajoru", Price = 800.00, CategoryId = 5, CreatedAt = seedDate, IsDeleted = false },
             new Product { Id = 109, Name = "Futbol Topu (Nike)", Price = 65.00, CategoryId = 5, CreatedAt = seedDate, IsDeleted = false }
         );
+  
     }
 }

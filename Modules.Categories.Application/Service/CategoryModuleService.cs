@@ -1,4 +1,7 @@
-﻿using Common.Exceptions;
+﻿using Common.Events;
+using Common.Exceptions;
+using MassTransit;
+using MediatR;
 using Modules.Categories.Application.Repositories;
 using Modules.Categories.Contract.CategoryDTOs;
 using Modules.Categories.Contract.Services;
@@ -14,10 +17,12 @@ public class CategoryModuleService : ICategoryModuleService
 {
     // DbContext əvəzinə artıq Repository istifadə edirik
     private readonly ICategoryRepository _repository;
+    private readonly IPublishEndpoint _publisher;
 
-    public CategoryModuleService(ICategoryRepository repository)
+    public CategoryModuleService(ICategoryRepository repository, IPublishEndpoint publisher)
     {
         _repository = repository;
+        _publisher = publisher;
     }
 
     public async Task<List<ResponseCategory>> Get()
@@ -91,6 +96,8 @@ public class CategoryModuleService : ICategoryModuleService
         }
 
         _repository.Remove(category);
+     
+        await _publisher.Publish(new CategoryDeletedEvent(id));
         await _repository.SaveChangesAsync();
     }
 }

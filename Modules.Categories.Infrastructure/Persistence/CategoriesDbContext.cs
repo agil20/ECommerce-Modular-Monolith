@@ -1,4 +1,5 @@
 ﻿using Common.Entites;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Modules.Categories.Domain;
 using Modules.Categories.Infrastructure.Persistence.Configurations;
@@ -22,6 +23,9 @@ public class CategoriesDbContext : DbContext
         modelBuilder.HasDefaultSchema("Categories");
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(CategoryConfiguration).Assembly);
+        modelBuilder.AddInboxStateEntity();
+        modelBuilder.AddOutboxMessageEntity();
+        modelBuilder.AddOutboxStateEntity();
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
