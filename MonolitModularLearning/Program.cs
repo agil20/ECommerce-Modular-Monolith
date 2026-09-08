@@ -60,22 +60,16 @@ builder.Services.AddDbContext<ProductsDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddMassTransit(x =>
 {
-    
     x.AddConsumer<ProductPriceChangedConsumer>();
     x.AddConsumer<CategoryDeletedEventConsumer>();
+
+    // Yalnız əsas CategoriesDbContext üçün outbox saxlayırıq ki, 500 xətası versin deyə çaşmasın
     x.AddEntityFrameworkOutbox<CategoriesDbContext>(o =>
     {
-        // PostgreSQL bazasını istifadə edirik
         o.UsePostgres();
+        o.UseBusOutbox();
+    });
 
-        // Mesajları cədvəldən oxuyub avtomatik RabbitMQ-ya göndərən "işçi" (worker)
-        o.UseBusOutbox();
-    });
-    x.AddEntityFrameworkOutbox<ProductsDbContext>(o =>
-    {
-        o.UsePostgres();
-        o.UseBusOutbox();
-    });
     x.UsingRabbitMq((context, cfg) =>
     {
         var configuration = context.GetRequiredService<IConfiguration>();
@@ -87,7 +81,6 @@ builder.Services.AddMassTransit(x =>
             h.Password(configuration["RabbitMQ:Password"]);
         });
 
-        // 2. YENİ: Qeydiyyatdan keçən consumer-lər üçün avtomatik Queue yaradır və Exchange-ə bağlayır
         cfg.ConfigureEndpoints(context);
     });
 });
