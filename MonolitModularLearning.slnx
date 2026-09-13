@@ -5,7 +5,7 @@
     <Project Path="Modules.Baskets.Application/Modules.Baskets.Application.csproj" Id="b84afd20-4901-4523-8563-5ecc55478fe3" />
     <Project Path="Modules.Baskets.Contract/Modules.Baskets.Contract.csproj" Id="8d1fc542-31af-4e0e-9a43-99976e0737a5" />
     <Project Path="Modules.Baskets.Domain/Modules.Baskets.Domain.csproj" Id="6c835083-93b6-46bb-967a-868a687962b6" />
-    <Project Path="Modules.Baskets.Infrastructure/Modules.Baskets.Infrastructure.csproj" />
+    <Project Path="Modules.Baskets.Infrastructure/Modules.Baskets.Infrastructure.csproj" Id="c00eb1e3-3ef1-4051-9871-57abf0662842" />
     <Project Path="Modules.Baskets.Presentation/Modules.Baskets.Presentation.csproj" Id="81a89f8b-88c5-49cc-a0c3-ea6c25ee775c" />
   </Folder>
   <Folder Name="/src/Modules/Categories/">
