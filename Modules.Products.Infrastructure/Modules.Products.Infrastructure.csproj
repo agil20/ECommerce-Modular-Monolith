@@ -10,6 +10,7 @@
 
 	<ItemGroup>
 		<!-- Verilənlər bazası və EF Core paketləri -->
+		<PackageReference Include="MassTransit.EntityFrameworkCore" Version="9.2.1" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0">
@@ -21,7 +22,9 @@
 
 	<ItemGroup>
 		<!-- Digər qatları tanımaq üçün referanslar -->
+		<ProjectReference Include="..\Common\Common.csproj" />
 		<ProjectReference Include="..\Modules.Categories.Contracts\Modules.Categories.Contracts.csproj" />
+		<ProjectReference Include="..\Modules.Products.Application\Modules.Products.Application.csproj" />
 		<ProjectReference Include="..\Modules.Products.Contracts\Modules.Products.Contracts.csproj" />
 		<ProjectReference Include="..\Modules.Products.Domain\Modules.Products.Domain.csproj" />
 	</ItemGroup>

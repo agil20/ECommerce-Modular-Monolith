@@ -1,18 +1,20 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Modules.Products.Contracts.Services;
-using Modules.Products.Infrastructure.Service;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Modules.Products.Application.Repositories;
+using Modules.Products.Infrastructure.Repositories;
 
-namespace Modules.Products.Infrastructure.Extentions
+namespace Modules.Products.Application.Extentions;
+
+public static class ProductExtentions
 {
-    public static class ProductExtentions
+    public static IServiceCollection AddProductsModule(this IServiceCollection services)
     {
-        public static IServiceCollection AddProductsModule(this IServiceCollection services)
-        {
-            services.AddScoped<IProductModuleService, PrductModuleService>();
-            return services;
-        }
+        services.AddScoped<IProductModuleService, ProductModuleService>();
+        services.AddScoped<IProductRepository, ProductRepository>();
+
+     
+        services.AddScoped<IProductPriceHistoryRepository, ProductPriceHistoryRepository>();
+
+        return services;
     }
 }

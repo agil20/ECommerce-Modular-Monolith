@@ -1,17 +1,38 @@
+using Common.Exceptions;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
+
 using Modules.Baskets.Infrastructure.Extentions;
 using Modules.Baskets.Infrastructure.Persistence;
 using Modules.Categories.Extentions;
 using Modules.Categories.Infrastructure.Persistence;
-using Modules.Products.Infrastructure.Extentions;
+using Modules.Products.Application.Consumers;
+using Modules.Products.Application.Extentions;
+using Modules.Products.Infrastructure.Consumers;
 using Modules.Products.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddExceptionHandler<GlobalException>();
+builder.Services.AddProblemDetails();
+
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
+// =========================================================================
+// YENİ: CORS QEYDİYYATI (Frontend-in API-yə qoşula bilməsi üçün mütləqdir)
+// =========================================================================
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
 // Swagger qeydiyyatı
 builder.Services.AddSwaggerGen(c =>
@@ -25,24 +46,47 @@ builder.Services.AddCategoriesModule();
 builder.Services.AddProductsModule();
 builder.Services.AddBasketModule();
 
-
 builder.Services.AddMediatR(cfg => {
     cfg.RegisterServicesFromAssemblies(AppDomain.CurrentDomain.GetAssemblies());
 });
 
 builder.Services.AddDbContext<CategoriesDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 builder.Services.AddDbContext<BasketDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 builder.Services.AddDbContext<ProductsDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddMassTransit(x =>
+{
+    x.AddConsumer<ProductPriceChangedConsumer>();
+    x.AddConsumer<CategoryDeletedEventConsumer>();
 
-// =========================================================================
-// PROBLEM YARADAN SERVİSLƏRİ BİRBAŞA BURADA ZƏMANƏTLƏ QEYDİYYATDAN KEÇİRİRİK
-// =========================================================================
+    // Yalnız əsas CategoriesDbContext üçün outbox saxlayırıq ki, 500 xətası versin deyə çaşmasın
+    x.AddEntityFrameworkOutbox<CategoriesDbContext>(o =>
+    {
+        o.UsePostgres();
+        o.UseBusOutbox();
+    });
 
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        var configuration = context.GetRequiredService<IConfiguration>();
 
+        cfg.UseMessageRetry(r => r.Interval(3, TimeSpan.FromSeconds(5)));
+        cfg.Host(configuration["RabbitMQ:Host"], configuration["RabbitMQ:VirtualHost"], h =>
+        {
+            h.Username(configuration["RabbitMQ:Username"]);
+            h.Password(configuration["RabbitMQ:Password"]);
+        });
+
+        cfg.ConfigureEndpoints(context);
+    });
+});
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -53,11 +97,17 @@ if (app.Environment.IsDevelopment())
         c.SwaggerEndpoint("/swagger/categories/swagger.json", "Categories API");
         c.SwaggerEndpoint("/swagger/products/swagger.json", "Products API");
         c.SwaggerEndpoint("/swagger/baskets/swagger.json", "Baskets API");
+
         c.RoutePrefix = string.Empty;
     });
 }
 
+
 app.UseHttpsRedirection();
+
+
+app.UseCors("AllowAll");
+
 app.UseAuthorization();
 app.MapControllers();
-app.Run();  
+app.Run();
