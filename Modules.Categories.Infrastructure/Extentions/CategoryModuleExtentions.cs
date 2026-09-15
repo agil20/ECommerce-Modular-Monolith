@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Modules.Categories.Contract.Services;
-using Modules.Categories.Application.Service;
+using Modules.Categories.Infrastructure.Service;
 using Modules.Categories.Application.Repositories;
 using Modules.Categories.Infrastructure.Repositories;
 

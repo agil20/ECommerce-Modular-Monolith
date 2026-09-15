@@ -2,6 +2,7 @@
 using Modules.Products.Contracts.Services;
 using Modules.Products.Application.Repositories;
 using Modules.Products.Infrastructure.Repositories;
+using Modules.Products.Infrastructure.Service;
 
 namespace Modules.Products.Application.Extentions;
 

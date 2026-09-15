@@ -11,7 +11,7 @@ using Modules.Products.Contracts.ProductDTOs;
 using MassTransit;
 using Common.Events;
 
-namespace Modules.Products.Application;
+namespace Modules.Products.Infrastructure.Service;
 
 public class ProductModuleService : IProductModuleService
 {
