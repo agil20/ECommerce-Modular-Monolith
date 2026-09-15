@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace MonolitModularLearning.Filters
+namespace ECommerceApi.Filters
 {
     public class FuentValidatorFilter : IAsyncActionFilter
     {

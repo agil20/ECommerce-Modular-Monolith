@@ -23,5 +23,5 @@
     <Project Path="Modules.Products.Presentation/Modules.Products.Presentation.csproj" Id="498b10ce-1972-486b-bcf1-37bbe0fbd277" />
   </Folder>
   <Project Path="Common/Common.csproj" Id="4db05f26-bb4d-40f9-a3ed-59ba8b1f85e8" />
-  <Project Path="MonolitModularLearning/MonolitModularLearning.csproj" />
+  <Project Path="ECommerceApi/ECommerceApi.csproj" />
 </Solution>

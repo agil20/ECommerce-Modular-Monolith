@@ -1,4 +1,4 @@
-﻿namespace MonolitModularLearning.Common.Extentions
+﻿namespace Common.Extentions
 {
     public static class PaginationExtensions
     {
