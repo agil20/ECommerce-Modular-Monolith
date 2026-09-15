@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Modules.Categories.Infrastructure.Service;
+namespace Modules.Categories.Application.Service;
 
 public class CategoryModuleService : ICategoryModuleService
 {
