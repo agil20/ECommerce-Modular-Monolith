@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Modules.Categories.Infrastructure.Persistence;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Modules.Categories.Infrastructure.Migrations
 {
     [DbContext(typeof(CategoriesDbContext))]
-    partial class CategoriesDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260918220333_SyncMassTransitV8Outbox")]
+    partial class SyncMassTransitV8Outbox
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -198,7 +201,6 @@ namespace Modules.Categories.Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-                    NpgsqlPropertyBuilderExtensions.HasIdentityOptions(b.Property<int>("Id"), 100L, null, null, null, null, null);
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -221,17 +223,10 @@ namespace Modules.Categories.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = 1,
-                            CreatedAt = new DateTimeOffset(new DateTime(2026, 8, 17, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            IsDeleted = false,
-                            Name = "Elektronika"
-                        },
-                        new
-                        {
                             Id = 2,
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 8, 17, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
-                            Name = "Kompüter və Aksesuarlar"
+                            Name = "Elektronika"
                         },
                         new
                         {
@@ -245,35 +240,14 @@ namespace Modules.Categories.Infrastructure.Migrations
                             Id = 4,
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 8, 17, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
-                            Name = "Ayaqqabı"
+                            Name = "Ev və Mebel"
                         },
                         new
                         {
                             Id = 5,
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 8, 17, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
-                            Name = "Ev və Mebel"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            CreatedAt = new DateTimeOffset(new DateTime(2026, 8, 17, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            IsDeleted = false,
-                            Name = "Mətbəx"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            CreatedAt = new DateTimeOffset(new DateTime(2026, 8, 17, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            IsDeleted = false,
                             Name = "İdman və Əyləncə"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            CreatedAt = new DateTimeOffset(new DateTime(2026, 8, 17, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            IsDeleted = false,
-                            Name = "Kitablar"
                         });
                 });
 

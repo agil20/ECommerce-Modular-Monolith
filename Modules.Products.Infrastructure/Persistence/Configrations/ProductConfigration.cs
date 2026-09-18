@@ -1,8 +1,7 @@
-﻿  using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Modules.Products.Domain;
-using System;
-using System.Reflection.Emit;
+using Modules.Products.Infrastructure.Persistence.Seed;
 
 namespace Modules.Products.Infrastructure.Persistence.Configurations;
 
@@ -10,13 +9,15 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
 {
     public void Configure(EntityTypeBuilder<Product> builder)
     {
-        // Cədvəlin adı
         builder.ToTable("Products");
 
-        // Əsas xüsusiyyətlər (Properties)
         builder.HasKey(c => c.Id);
         builder.Property(c => c.Name).IsRequired().HasMaxLength(100);
         builder.Property(c => c.Price).IsRequired();
+
+        // Seeded rows use explicit ids up to 804; start the identity sequence past them so the first
+        // product created through the API does not collide with seed data.
+        builder.Property(c => c.Id).HasIdentityOptions(startValue: 1000);
 
         // ProductDescription ilə One-to-One (Birə-Bir) əlaqəsi
         builder.HasOne(p => p.ProductDescription)
@@ -28,28 +29,16 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
 
         builder.HasMany(p => p.ProductPriceHistories)
             .WithOne(ph => ph.Product)
-            .HasForeignKey(ph => ph.ProductId);    
-        // Data Seed (Başlanğıc məlumatları)
-        var seedDate = new DateTimeOffset(2026, 8, 17, 0, 0, 0, TimeSpan.Zero);
+            .HasForeignKey(ph => ph.ProductId);
 
-        builder.HasData(
-            // CategoryId = 2 (Elektronika)
-            new Product { Id = 101, Name = "Noutbuk Asus ROG", Price = 2499.99, CategoryId = 2, CreatedAt = seedDate, IsDeleted = false },
-            new Product { Id = 102, Name = "Apple iPhone 15 Pro", Price = 2799.00, CategoryId = 2, CreatedAt = seedDate, IsDeleted = false },
-            new Product { Id = 103, Name = "Simsiz Qulaqlıq AirPods", Price = 450.00, CategoryId = 2, CreatedAt = seedDate, IsDeleted = false },
-
-            // CategoryId = 3 (Geyim)
-            new Product { Id = 104, Name = "Kişi Qış Gödəkcəsi", Price = 120.50, CategoryId = 3, CreatedAt = seedDate, IsDeleted = false },
-            new Product { Id = 105, Name = "Qadın Donu", Price = 85.00, CategoryId = 3, CreatedAt = seedDate, IsDeleted = false },
-
-            // CategoryId = 4 (Ev və Mebel)
-            new Product { Id = 106, Name = "Ortopedik Matras", Price = 300.00, CategoryId = 4, CreatedAt = seedDate, IsDeleted = false },
-            new Product { Id = 107, Name = "İş Masası", Price = 150.00, CategoryId = 4, CreatedAt = seedDate, IsDeleted = false },
-
-            // CategoryId = 5 (İdman və Əyləncə)
-            new Product { Id = 108, Name = "Qaçış Trenajoru", Price = 800.00, CategoryId = 5, CreatedAt = seedDate, IsDeleted = false },
-            new Product { Id = 109, Name = "Futbol Topu (Nike)", Price = 65.00, CategoryId = 5, CreatedAt = seedDate, IsDeleted = false }
-        );
-  
+        builder.HasData(ProductSeed.Items.Select(p => new Product
+        {
+            Id = p.Id,
+            Name = p.Name,
+            Price = p.Price,
+            CategoryId = p.CategoryId,
+            CreatedAt = ProductSeed.SeedDate,
+            IsDeleted = false
+        }));
     }
 }

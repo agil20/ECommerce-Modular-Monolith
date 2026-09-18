@@ -2,22 +2,25 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Modules.Categories.Infrastructure.Persistence;
+using Modules.Products.Infrastructure.Persistence;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Modules.Categories.Infrastructure.Migrations
+namespace Modules.Products.Infrastructure.Migrations
 {
-    [DbContext(typeof(CategoriesDbContext))]
-    partial class CategoriesDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(ProductsDbContext))]
+    [Migration("20260918220337_SyncMassTransitV8Outbox")]
+    partial class SyncMassTransitV8Outbox
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasDefaultSchema("Categories")
+                .HasDefaultSchema("Products")
                 .HasAnnotation("ProductVersion", "10.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
@@ -67,7 +70,7 @@ namespace Modules.Categories.Infrastructure.Migrations
 
                     b.HasIndex("Delivered");
 
-                    b.ToTable("InboxState", "Categories");
+                    b.ToTable("InboxState", "Products");
                 });
 
             modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.OutboxMessage", b =>
@@ -158,7 +161,7 @@ namespace Modules.Categories.Infrastructure.Migrations
                     b.HasIndex("InboxMessageId", "InboxConsumerId", "SequenceNumber")
                         .IsUnique();
 
-                    b.ToTable("OutboxMessage", "Categories");
+                    b.ToTable("OutboxMessage", "Products");
                 });
 
             modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.OutboxState", b =>
@@ -188,17 +191,19 @@ namespace Modules.Categories.Infrastructure.Migrations
 
                     b.HasIndex("Created");
 
-                    b.ToTable("OutboxState", "Categories");
+                    b.ToTable("OutboxState", "Products");
                 });
 
-            modelBuilder.Entity("Modules.Categories.Domain.Category", b =>
+            modelBuilder.Entity("Modules.Products.Domain.Product", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-                    NpgsqlPropertyBuilderExtensions.HasIdentityOptions(b.Property<int>("Id"), 100L, null, null, null, null, null);
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("integer");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -206,75 +211,174 @@ namespace Modules.Categories.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsVip")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
+
+                    b.Property<double>("Price")
+                        .HasColumnType("double precision");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories", "Categories");
+                    b.ToTable("Products", "Products");
 
                     b.HasData(
                         new
                         {
-                            Id = 1,
+                            Id = 101,
+                            CategoryId = 2,
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 8, 17, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
-                            Name = "Elektronika"
+                            IsVip = false,
+                            Name = "Noutbuk Asus ROG",
+                            Price = 2499.9899999999998
                         },
                         new
                         {
-                            Id = 2,
+                            Id = 102,
+                            CategoryId = 2,
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 8, 17, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
-                            Name = "Kompüter və Aksesuarlar"
+                            IsVip = false,
+                            Name = "Apple iPhone 15 Pro",
+                            Price = 2799.0
                         },
                         new
                         {
-                            Id = 3,
+                            Id = 103,
+                            CategoryId = 2,
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 8, 17, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
-                            Name = "Geyim"
+                            IsVip = false,
+                            Name = "Simsiz Qulaqlıq AirPods",
+                            Price = 450.0
                         },
                         new
                         {
-                            Id = 4,
+                            Id = 104,
+                            CategoryId = 3,
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 8, 17, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
-                            Name = "Ayaqqabı"
+                            IsVip = false,
+                            Name = "Kişi Qış Gödəkcəsi",
+                            Price = 120.5
                         },
                         new
                         {
-                            Id = 5,
+                            Id = 105,
+                            CategoryId = 3,
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 8, 17, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
-                            Name = "Ev və Mebel"
+                            IsVip = false,
+                            Name = "Qadın Donu",
+                            Price = 85.0
                         },
                         new
                         {
-                            Id = 6,
+                            Id = 106,
+                            CategoryId = 4,
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 8, 17, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
-                            Name = "Mətbəx"
+                            IsVip = false,
+                            Name = "Ortopedik Matras",
+                            Price = 300.0
                         },
                         new
                         {
-                            Id = 7,
+                            Id = 107,
+                            CategoryId = 4,
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 8, 17, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
-                            Name = "İdman və Əyləncə"
+                            IsVip = false,
+                            Name = "İş Masası",
+                            Price = 150.0
                         },
                         new
                         {
-                            Id = 8,
+                            Id = 108,
+                            CategoryId = 5,
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 8, 17, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
-                            Name = "Kitablar"
+                            IsVip = false,
+                            Name = "Qaçış Trenajoru",
+                            Price = 800.0
+                        },
+                        new
+                        {
+                            Id = 109,
+                            CategoryId = 5,
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 8, 17, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            IsVip = false,
+                            Name = "Futbol Topu (Nike)",
+                            Price = 65.0
                         });
+                });
+
+            modelBuilder.Entity("Modules.Products.Domain.ProductDescription", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ProductDescriptions", "Products");
+                });
+
+            modelBuilder.Entity("Modules.Products.Domain.ProductPriceHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("ChangedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<double>("NewPrice")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("OldPrice")
+                        .HasColumnType("double precision");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ProductPriceHistories", "Products");
                 });
 
             modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.OutboxMessage", b =>
@@ -287,6 +391,35 @@ namespace Modules.Categories.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("InboxMessageId", "InboxConsumerId")
                         .HasPrincipalKey("MessageId", "ConsumerId");
+                });
+
+            modelBuilder.Entity("Modules.Products.Domain.ProductDescription", b =>
+                {
+                    b.HasOne("Modules.Products.Domain.Product", "Product")
+                        .WithOne("ProductDescription")
+                        .HasForeignKey("Modules.Products.Domain.ProductDescription", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Modules.Products.Domain.ProductPriceHistory", b =>
+                {
+                    b.HasOne("Modules.Products.Domain.Product", "Product")
+                        .WithMany("ProductPriceHistories")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Modules.Products.Domain.Product", b =>
+                {
+                    b.Navigation("ProductDescription");
+
+                    b.Navigation("ProductPriceHistories");
                 });
 #pragma warning restore 612, 618
         }
