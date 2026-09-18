@@ -15,6 +15,12 @@
     <Project Path="Modules.Categories.Infrastructure/Modules.Categories.Infrastructure.csproj" Id="23d2042e-612d-40b4-89bc-597018c98036" />
     <Project Path="Modules.Categories.Presentation/Modules.Categories.Presentation.csproj" Id="99051b1f-f7b1-426a-a3aa-2685486b4451" />
   </Folder>
+  <Folder Name="/src/Modules/Identity/">
+    <Project Path="Modules.Identity.Contracts/Modules.Identity.Contracts.csproj" />
+    <Project Path="Modules.Identity.Domain/Modules.Identity.Domain.csproj" Id="3335266d-504b-44ce-a2dd-6b5004d9a862" />
+    <Project Path="Modules.Identity.Infrastructure/Modules.Identity.Infrastructure.csproj" Id="e65b4c6c-124c-47f1-bb95-399af90880db" />
+    <Project Path="Modules.Identity.Presentation/Modules.Identity.Presentation.csproj" Id="c35770d5-4ceb-4ab8-9f4e-3b82bcd3f614" />
+  </Folder>
   <Folder Name="/src/Modules/Products/">
     <Project Path="Modules.Products.Application/Modules.Products.Application.csproj" Id="3b890662-f590-4fc1-9c3d-d10b3086b719" />
     <Project Path="Modules.Products.Contracts/Modules.Products.Contracts.csproj" Id="b071d087-1b8e-47f5-b568-67d36de25615" />

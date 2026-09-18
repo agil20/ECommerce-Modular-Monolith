@@ -17,21 +17,12 @@ public class ProductsDbContext : DbContext
     public DbSet<Product> Products { get; set; }
     public DbSet<ProductDescription> ProductDescriptions { get; set; }
     public DbSet<ProductPriceHistory>ProductPriceHistories { get; set; }
-    public DbSet<CategoryLookup> CategoryLookups { get; set; } 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.HasDefaultSchema("Products");
-        modelBuilder.Entity<CategoryLookup>(builder =>
-        {
-       
-            builder.HasKey(c => c.Id);
-
-        
-            builder.Property(c => c.Id).ValueGeneratedNever();
-        });
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ProductConfiguration).Assembly);
         modelBuilder.AddInboxStateEntity();
         modelBuilder.AddOutboxMessageEntity();

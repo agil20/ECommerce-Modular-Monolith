@@ -11,6 +11,7 @@
 		<PackageReference Include="FluentValidation" Version="12.1.1" />
 		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
 		<PackageReference Include="MassTransit.RabbitMQ" Version="8.5.10" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.10" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.10">
 			<PrivateAssets>all</PrivateAssets>
@@ -35,6 +36,8 @@
 		<ProjectReference Include="..\Modules.Categories.Presentation\Modules.Categories.Presentation.csproj" />
 		<ProjectReference Include="..\Modules.Products.Infrastructure\Modules.Products.Infrastructure.csproj" />
 		<ProjectReference Include="..\Modules.Products.Presentation\Modules.Products.Presentation.csproj" />
+		<ProjectReference Include="..\Modules.Identity.Infrastructure\Modules.Identity.Infrastructure.csproj" />
+		<ProjectReference Include="..\Modules.Identity.Presentation\Modules.Identity.Presentation.csproj" />
 	</ItemGroup>
 
 </Project>
