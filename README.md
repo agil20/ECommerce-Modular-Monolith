@@ -69,15 +69,30 @@ Implemented with MassTransit over RabbitMQ:
 
 ## Authentication
 
-ASP.NET Core Identity stores users in the `Identity` schema; login issues a signed JWT.
+ASP.NET Core Identity stores users in the `Identity` schema. Login returns a short-lived access token
+(JWT, 15 minutes) and a long-lived refresh token (7 days).
 
 | Endpoint | Description |
 |---|---|
-| `POST /api/Auth/register` | Creates a user and returns a JWT |
-| `POST /api/Auth/login` | Validates credentials and returns a JWT |
+| `POST /api/Auth/register` | Creates a user (role `User`) and returns an access + refresh token |
+| `POST /api/Auth/login` | Validates credentials and returns an access + refresh token |
+| `POST /api/Auth/refresh` | Exchanges a refresh token for a new access + refresh token |
+| `POST /api/Auth/logout` | Revokes a refresh token |
 
-The token carries `sub`, `email`, `jti` and `nameidentifier` claims plus the user's roles and
-permissions, and is validated against issuer, audience, lifetime and signing key.
+The access token carries `sub`, `email`, `jti` and `nameidentifier` claims plus the user's roles and
+permissions, and is validated against issuer, audience, lifetime and signing key. Failed login and
+invalid refresh tokens return `401`, with the same message for an unknown email and a wrong password
+so accounts cannot be enumerated.
+
+### Refresh tokens
+
+- Stored in their own `Identity.RefreshTokens` table, one row per session, so a user can be logged in
+  on several devices and log out of one without affecting the others.
+- Only a SHA-256 hash of the token is stored; a leaked database does not expose usable tokens.
+- **Rotation** — every refresh revokes the used token and issues a new one (`ReplacedByTokenHash`
+  keeps the chain).
+- **Reuse detection** — presenting an already revoked token is treated as theft: all of that user's
+  active refresh tokens are revoked and the caller gets `401`.
 
 The basket endpoints require a token and never take a basket id from the client: the user id is read
 from the token, so a user can only ever reach their own basket.
@@ -140,7 +155,8 @@ next login.
     "Key": "YOUR_JWT_SECRET_KEY_AT_LEAST_32_CHARACTERS_LONG",
     "Issuer": "ECommerceApi",
     "Audience": "ECommerceApiUsers",
-    "ExpireMinutes": 60
+    "ExpireMinutes": 15,
+    "RefreshTokenDays": 7
   },
   "AdminUser": {
     "Email": "YOUR_ADMIN_EMAIL",

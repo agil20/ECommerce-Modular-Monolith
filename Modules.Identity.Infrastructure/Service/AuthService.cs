@@ -1,6 +1,7 @@
-﻿using Common.Authorization;
+using Common.Authorization;
 using Common.Exceptions;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Modules.Identity.Contracts.AuthDTOs;
@@ -9,6 +10,7 @@ using Modules.Identity.Domain;
 using Modules.Identity.Infrastructure.Persistence;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Modules.Identity.Infrastructure.Service;
@@ -17,15 +19,18 @@ public class AuthService : IAuthService
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly IdentityModuleDbContext _dbContext;
     private readonly IConfiguration _configuration;
 
     public AuthService(
         UserManager<ApplicationUser> userManager,
         RoleManager<IdentityRole> roleManager,
+        IdentityModuleDbContext dbContext,
         IConfiguration configuration)
     {
         _userManager = userManager;
         _roleManager = roleManager;
+        _dbContext = dbContext;
         _configuration = configuration;
     }
 
@@ -51,25 +56,68 @@ public class AuthService : IAuthService
 
         await _userManager.AddToRoleAsync(user, IdentitySeeder.UserRole);
 
-        return await GenerateTokenAsync(user);
+        return await GenerateTokensAsync(user);
     }
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request)
     {
         var user = await _userManager.FindByEmailAsync(request.Email);
 
-        // Təhlükəsizlik: "email yoxdur" ilə "parol səhvdir" ayrı mesaj olmamalıdır
-        if (user is null)
-            throw new NotFoundException("Email və ya parol yanlışdır");
+        // Same message for unknown email and wrong password, so emails cannot be enumerated.
+        if (user is null || !await _userManager.CheckPasswordAsync(user, request.Password))
+            throw new UnauthorizedException("Email və ya parol yanlışdır");
 
-        var passwordValid = await _userManager.CheckPasswordAsync(user, request.Password);
-        if (!passwordValid)
-            throw new NotFoundException("Email və ya parol yanlışdır");
-
-        return await GenerateTokenAsync(user);
+        return await GenerateTokensAsync(user);
     }
 
-    private async Task<AuthResponse> GenerateTokenAsync(ApplicationUser user)
+    public async Task<AuthResponse> RefreshAsync(RefreshRequest request)
+    {
+        var tokenHash = HashToken(request.RefreshToken);
+
+        var storedToken = await _dbContext.RefreshTokens
+            .SingleOrDefaultAsync(t => t.TokenHash == tokenHash)
+            ?? throw new UnauthorizedException("Refresh token etibarsızdır");
+
+        // A revoked token being presented again means it was stolen and replayed:
+        // kill every active session of that user.
+        if (storedToken.RevokedAt is not null)
+        {
+            await RevokeAllActiveTokensAsync(storedToken.UserId);
+            throw new UnauthorizedException("Refresh token artıq istifadə olunub");
+        }
+
+        if (storedToken.ExpiresAt <= DateTime.UtcNow)
+            throw new UnauthorizedException("Refresh token-in vaxtı bitib");
+
+        var user = await _userManager.FindByIdAsync(storedToken.UserId)
+            ?? throw new UnauthorizedException("Refresh token etibarsızdır");
+
+        storedToken.RevokedAt = DateTime.UtcNow;
+
+        var response = await GenerateTokensAsync(user);
+
+        storedToken.ReplacedByTokenHash = HashToken(response.RefreshToken);
+        await _dbContext.SaveChangesAsync();
+
+        return response;
+    }
+
+    public async Task LogoutAsync(RefreshRequest request)
+    {
+        var tokenHash = HashToken(request.RefreshToken);
+
+        var storedToken = await _dbContext.RefreshTokens
+            .SingleOrDefaultAsync(t => t.TokenHash == tokenHash);
+
+        // Logout is idempotent: an unknown or already revoked token is not an error.
+        if (storedToken is null || storedToken.RevokedAt is not null)
+            return;
+
+        storedToken.RevokedAt = DateTime.UtcNow;
+        await _dbContext.SaveChangesAsync();
+    }
+
+    private async Task<AuthResponse> GenerateTokensAsync(ApplicationUser user)
     {
         var key = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
@@ -113,12 +161,40 @@ public class AuthService : IAuthService
             expires: expires,
             signingCredentials: credentials);
 
+        var refreshToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+        var refreshTokenExpires = DateTime.UtcNow
+            .AddDays(int.Parse(_configuration["Jwt:RefreshTokenDays"]!));
+
+        _dbContext.RefreshTokens.Add(new RefreshToken
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            TokenHash = HashToken(refreshToken),
+            CreatedAt = DateTime.UtcNow,
+            ExpiresAt = refreshTokenExpires
+        });
+        await _dbContext.SaveChangesAsync();
+
         return new AuthResponse
         {
             Token = new JwtSecurityTokenHandler().WriteToken(token),
             ExpiresAt = expires,
+            RefreshToken = refreshToken,
+            RefreshTokenExpiresAt = refreshTokenExpires,
             UserId = user.Id,
             Email = user.Email!
         };
     }
+
+    private async Task RevokeAllActiveTokensAsync(string userId)
+    {
+        var now = DateTime.UtcNow;
+
+        await _dbContext.RefreshTokens
+            .Where(t => t.UserId == userId && t.RevokedAt == null)
+            .ExecuteUpdateAsync(s => s.SetProperty(t => t.RevokedAt, now));
+    }
+
+    private static string HashToken(string token) =>
+        Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
 }

@@ -20,6 +20,7 @@ public class GlobalException : IExceptionHandler
             NotFoundException =>(int) HttpStatusCode.NotFound,
             DublicatedDataException =>(int) HttpStatusCode.BadRequest,
             ConfilictException =>(int) HttpStatusCode.BadRequest,
+            UnauthorizedException =>(int) HttpStatusCode.Unauthorized,
             _=>(int)HttpStatusCode.InternalServerError
 
         };

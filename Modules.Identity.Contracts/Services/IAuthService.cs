@@ -1,4 +1,4 @@
-﻿using Modules.Identity.Contracts.AuthDTOs;
+using Modules.Identity.Contracts.AuthDTOs;
 
 namespace Modules.Identity.Contracts.Services;
 
@@ -6,4 +6,6 @@ public interface IAuthService
 {
     Task<AuthResponse> RegisterAsync(RegisterRequest request);
     Task<AuthResponse> LoginAsync(LoginRequest request);
+    Task<AuthResponse> RefreshAsync(RefreshRequest request);
+    Task LogoutAsync(RefreshRequest request);
 }
