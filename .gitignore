@@ -427,3 +427,6 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Local secrets (connection strings, RabbitMQ, JWT key)
+appsettings.Development.json

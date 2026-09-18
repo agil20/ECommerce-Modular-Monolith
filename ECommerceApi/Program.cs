@@ -1,4 +1,6 @@
 using Common.Exceptions;
+using ECommerceApi.Filters;
+using FluentValidation;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +10,7 @@ using Modules.Baskets.Infrastructure.Extentions;
 using Modules.Baskets.Infrastructure.Persistence;
 using Modules.Categories.Extentions;
 using Modules.Categories.Infrastructure.Persistence;
+using Modules.Categories.Validators;
 using Modules.Identity.Contracts.Services;
 using Modules.Identity.Extentions;
 using Modules.Identity.Infrastructure.Persistence;
@@ -16,6 +19,7 @@ using Modules.Products.Application.Consumers;
 using Modules.Products.Application.Extentions;
 using Modules.Products.Infrastructure.Consumers;
 using Modules.Products.Infrastructure.Persistence;
+using Modules.Products.Validators;
 using System.Text;
 
 
@@ -24,8 +28,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddExceptionHandler<GlobalException>();
 builder.Services.AddProblemDetails();
 builder.Services.AddIdentityModule();
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<FuentValidatorFilter>();
+});
 builder.Services.AddEndpointsApiExplorer();
+
+// FluentValidation: validator-ları modul assembly-lərindən tapıb DI-a qeyd edirik
+builder.Services.AddValidatorsFromAssemblyContaining<CreateCategoryValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateProductValidator>();
 
 // =========================================================================
 // YENİ: CORS QEYDİYYATI (Frontend-in API-yə qoşula bilməsi üçün mütləqdir)
