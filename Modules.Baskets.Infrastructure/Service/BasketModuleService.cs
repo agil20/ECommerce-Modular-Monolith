@@ -13,6 +13,7 @@ namespace Modules.Baskets.Infrastructure.Service
 {
     public class BasketModuleService : IBasketModuleService
     {
+    
         private readonly BasketDbContext _basketDbContext;
         private readonly IProductModuleService _productModuleService;
 
@@ -22,17 +23,18 @@ namespace Modules.Baskets.Infrastructure.Service
             _productModuleService = productModuleService;
         }
 
-        public async Task AddItemToBasketAsync(int basketId, RequestBasketItem requestBasketItem)
+        public async Task AddItemToBasketAsync(string userId, RequestBasketItem requestBasketItem)
         {
             var basket = await _basketDbContext.Baskets
                 .Include(b => b.Items)
-                .FirstOrDefaultAsync(b => b.Id == basketId);
+                .FirstOrDefaultAsync(b => b.UserId == userId);
 
             if (basket == null)
             {
-                basket = new Domain.Basket();
+                basket = new Domain.Basket { UserId = userId };
                 _basketDbContext.Add(basket);
             }
+
 
             var existingItem = basket.Items.FirstOrDefault(i => i.ProductId == requestBasketItem.ProductId);
             if (existingItem != null)
@@ -51,14 +53,15 @@ namespace Modules.Baskets.Infrastructure.Service
             await _basketDbContext.SaveChangesAsync();
         }
 
-        public async Task<List<BasketItemDtos>> GetBasketAsync(int basketId)
+        public async Task<List<BasketItemDtos>> GetBasketAsync(string userId)
         {
             var basket = await _basketDbContext.Baskets
                 .Include(b => b.Items)
-                .FirstOrDefaultAsync(b => b.Id == basketId);
+                .FirstOrDefaultAsync(b => b.UserId == userId);
 
             if (basket == null)
-                throw new NotFoundException($"ID-si {basketId} olan səbət tapılmadı");
+                return new List<BasketItemDtos>();
+         
 
             var ids = basket.Items.Select(i => i.ProductId).ToList();
 
@@ -80,15 +83,15 @@ namespace Modules.Baskets.Infrastructure.Service
             return basketitemsdto;
         }
 
-        public async Task RemoveItemFromBasketAsync(int basketId, int productId)
+        public async Task RemoveItemFromBasketAsync(string userId, int productId)
         {
             var basket = await _basketDbContext.Baskets
                 .Include(b => b.Items)
-                .FirstOrDefaultAsync(b => b.Id == basketId);
+                .FirstOrDefaultAsync(b => b.UserId == userId);
 
             if (basket == null)
-                throw new NotFoundException($"ID-si {basketId} olan səbət tapılmadı");
-
+                throw new NotFoundException("Səbət tapılmadı");
+          
             var itemToRemove = basket.Items.FirstOrDefault(i => i.ProductId == productId);
 
             if (itemToRemove == null)

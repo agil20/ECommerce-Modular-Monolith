@@ -1,21 +1,10 @@
-﻿using Modules.Baskets.Contract.DTOs.BasketItemDTOs;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-using System.Threading.Tasks;
-
+using Modules.Baskets.Contract.DTOs.BasketItemDTOs;
 
 namespace Modules.Basket.Contract.Services;
 
 public interface IBasketModuleService
 {
-   
-    Task<List<BasketItemDtos>> GetBasketAsync(int basketId);
-
-  
-    Task AddItemToBasketAsync(int basketId,RequestBasketItem requestBasketItem);
-    Task RemoveItemFromBasketAsync(int basketId, int productId);
-
-
+    Task<List<BasketItemDtos>> GetBasketAsync(string userId);
+    Task AddItemToBasketAsync(string userId, RequestBasketItem requestBasketItem);
+    Task RemoveItemFromBasketAsync(string userId, int productId);
 }
