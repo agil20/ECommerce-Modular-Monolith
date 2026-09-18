@@ -76,8 +76,41 @@ ASP.NET Core Identity stores users in the `Identity` schema; login issues a sign
 | `POST /api/Auth/register` | Creates a user and returns a JWT |
 | `POST /api/Auth/login` | Validates credentials and returns a JWT |
 
-The token carries `sub`, `email`, `jti` and `nameidentifier` claims and is validated against issuer,
-audience, lifetime and signing key.
+The token carries `sub`, `email`, `jti` and `nameidentifier` claims plus the user's roles and
+permissions, and is validated against issuer, audience, lifetime and signing key.
+
+The basket endpoints require a token and never take a basket id from the client: the user id is read
+from the token, so a user can only ever reach their own basket.
+
+## Authorization (permission-based)
+
+Endpoints are protected by **permissions**, not by role names. Roles are just groups of permissions.
+
+```csharp
+[HttpPost]
+[HasPermission(Permissions.Categories.Create)]
+public async Task<IActionResult> Post(RequestCategoryCreate dto) { ... }
+```
+
+- Permissions are defined once in `Common/Authorization/Permissions.cs`
+  (`categories.create|update|delete`, `products.create|update|delete`).
+- Each role's permissions are stored as role claims in Identity's `AspNetRoleClaims` table — no extra
+  tables or migrations.
+- At login every permission from the user's roles is written into the JWT as a `permission` claim.
+- Every permission is registered as an authorization policy of the same name; `[HasPermission(x)]` is
+  `[Authorize(Policy = x)]`.
+
+| Role | Permissions |
+|---|---|
+| `Admin` | all category and product write permissions |
+| `User` | none — can manage only their own basket; assigned automatically on register |
+
+Read endpoints (`GET`) for categories and products are public. Write endpoints return `401` without a
+token and `403` when the token lacks the permission.
+
+Roles, the admin role's permissions and an admin account are seeded at startup (`IdentitySeeder`).
+Because permissions live in the token, a change to a role's permissions takes effect at the user's
+next login.
 
 ## Getting started
 
@@ -108,11 +141,16 @@ audience, lifetime and signing key.
     "Issuer": "ECommerceApi",
     "Audience": "ECommerceApiUsers",
     "ExpireMinutes": 60
+  },
+  "AdminUser": {
+    "Email": "YOUR_ADMIN_EMAIL",
+    "Password": "YOUR_ADMIN_PASSWORD"
   }
 }
 ```
 
 The JWT key must be at least 32 characters, otherwise HMAC-SHA256 signing fails at runtime.
+`AdminUser` is optional: when present, an account with the `Admin` role is created on startup.
 
 ### Database
 

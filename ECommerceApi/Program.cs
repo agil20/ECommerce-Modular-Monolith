@@ -1,3 +1,4 @@
+using Common.Authorization;
 using Common.Exceptions;
 using ECommerceApi.Filters;
 using FluentValidation;
@@ -104,6 +105,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
         };
     });
+
+// Each permission becomes a policy of the same name, used by [HasPermission(...)]
+builder.Services.AddAuthorization(options =>
+{
+    foreach (var permission in Permissions.All)
+        options.AddPolicy(permission, policy => policy.RequireClaim(Permissions.ClaimType, permission));
+});
 builder.Services.AddMassTransit(x =>
 {
     x.AddConsumer<ProductPriceChangedConsumer>();
@@ -131,6 +139,8 @@ builder.Services.AddMassTransit(x =>
     });
 });
 var app = builder.Build();
+
+await IdentitySeeder.SeedAsync(app.Services);
 
 app.UseExceptionHandler();
 

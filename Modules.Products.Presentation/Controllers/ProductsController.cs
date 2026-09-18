@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Common.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Modules.Categories.Contract.Services;
 using Modules.Products.Contract.ProductDTOs;
 using Modules.Products.Contracts.Services;
@@ -22,6 +23,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpPost]
+    [HasPermission(Permissions.Products.Create)]
     public async Task<IActionResult> Post(RequestProductCreate productdto)
     {
         await _productModuleService.Post(productdto);
@@ -46,6 +48,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [HasPermission(Permissions.Products.Update)]
     public async Task<IActionResult> Put(int id, RequestUpdateProduct productdto)
     {
         await _productModuleService.Update(id, productdto);
@@ -54,6 +57,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [HasPermission(Permissions.Products.Delete)]
     public async Task<IActionResult> Delete(int id)
     {
         await _productModuleService.Delete(id);

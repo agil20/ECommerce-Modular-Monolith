@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Common.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Modules.Categories.Contract.CategoryDTOs;
 using Modules.Categories.Contract.Services;
 using Common.Models;
@@ -19,6 +20,7 @@ public class CategoryController : ControllerBase
     }
 
     [HttpPost]
+    [HasPermission(Permissions.Categories.Create)]
     public async Task<IActionResult> Post(RequestCategoryCreate categorydto)
     {
         await _categoryModuleService.Post(categorydto);
@@ -37,6 +39,7 @@ public class CategoryController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [HasPermission(Permissions.Categories.Update)]
     public async Task<IActionResult> Put(int id, RequestCategoryUpdate categorydto)
     {
         await _categoryModuleService.Update(id, categorydto);
@@ -45,6 +48,7 @@ public class CategoryController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [HasPermission(Permissions.Categories.Delete)]
     public async Task<IActionResult> Delete(int id)
     {
         await _categoryModuleService.Delete(id);
