@@ -58,6 +58,18 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("products", new OpenApiInfo { Title = "Products Module API", Version = "v1" });
     c.SwaggerDoc("baskets", new OpenApiInfo { Title = "Baskets Module API", Version = "v1" });
     c.SwaggerDoc("identity", new OpenApiInfo { Title = "Identity Module API", Version = "v1" });
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Description = "Login-dən aldığın token-i yapışdır (\"Bearer\" sözü olmadan)"
+    });
+
+    c.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+    {
+        [new OpenApiSecuritySchemeReference("Bearer", document)] = []
+    });
 });
 
 builder.Services.AddCategoriesModule();
