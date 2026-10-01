@@ -1,6 +1,7 @@
 using Common.Authorization;
 using Common.Exceptions;
 using ECommerceApi.Filters;
+using ECommerceApi.Middleware;
 using FluentValidation;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -21,8 +22,8 @@ using Modules.Products.Application.Extentions;
 using Modules.Products.Infrastructure.Consumers;
 using Modules.Products.Infrastructure.Persistence;
 using Modules.Products.Validators;
-using System.Text;
 using Serilog;
+using System.Text;
 // Muveqqeti logger: appsettings hele oxunmayib, DI hele yoxdur, amma start-up xetalari ucun bir hedef lazimdir.
 // builder.Build() icra olunanda bunu asagidaki tam konfiqli logger avtomatik evez edir.
 Log.Logger = new LoggerConfiguration()
@@ -177,7 +178,9 @@ app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapControllers();
+  
+    app.UseMiddleware<UserContextLoggingMiddleware>();
+    app.MapControllers();
     app.Run();
 }
 catch (Exception ex) when (ex is not HostAbortedException)

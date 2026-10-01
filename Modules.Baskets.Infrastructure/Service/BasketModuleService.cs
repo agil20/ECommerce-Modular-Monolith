@@ -54,10 +54,10 @@ namespace Modules.Baskets.Infrastructure.Service
             }
 
             await _basketDbContext.SaveChangesAsync();
-            _logger.LogInformation
-                ("Basket item added. UserId: {UserId}, ProductId: {ProductId}, Quantity: {Quantity}",
-                userId, requestBasketItem.ProductId, requestBasketItem.Quantity
-                );
+            _logger.LogInformation(
+        "Basket item added. ProductId: {ProductId}, Quantity: {Quantity}",
+        requestBasketItem.ProductId,
+        requestBasketItem.Quantity);
         }
 
         public async Task<List<BasketItemDtos>> GetBasketAsync(string userId)
