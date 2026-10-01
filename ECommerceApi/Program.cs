@@ -22,9 +22,19 @@ using Modules.Products.Infrastructure.Consumers;
 using Modules.Products.Infrastructure.Persistence;
 using Modules.Products.Validators;
 using System.Text;
-
-
-var builder = WebApplication.CreateBuilder(args);
+using Serilog;
+// Muveqqeti logger: appsettings hele oxunmayib, DI hele yoxdur, amma start-up xetalari ucun bir hedef lazimdir.
+// builder.Build() icra olunanda bunu asagidaki tam konfiqli logger avtomatik evez edir.
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
+try
+{
+    var builder = WebApplication.CreateBuilder(args);
+// Serilog-u hosting pipeline-ına qoşuruq: bundan sonra ILogger<T>-ə yazılan hər şey Serilog-dan keçir
+// Butun Serilog ayarlari appsettings.json-dakı "Serilog" bolmesinden oxunur
+builder.Host.UseSerilog((context, configuration) => configuration
+    .ReadFrom.Configuration(context.Configuration));
 
 builder.Services.AddExceptionHandler<GlobalException>();
 builder.Services.AddProblemDetails();
@@ -155,6 +165,8 @@ if (app.Environment.IsDevelopment())
         c.SwaggerEndpoint("/swagger/baskets/swagger.json", "Baskets API");
         c.SwaggerEndpoint("/swagger/identity/swagger.json", "Identity API");
         c.RoutePrefix = string.Empty;
+        // Token-i brauzerin localStorage-inda saxlayir: F5-den sonra yeniden yapisdirmaq lazim deyil (yalniz Development)
+        c.EnablePersistAuthorization();
     });
 }
 
@@ -166,4 +178,13 @@ app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.Run();
+    app.Run();
+}
+catch (Exception ex) when (ex is not HostAbortedException)
+{
+    Log.Fatal(ex, "Application start-up failed");
+}
+finally
+{
+    Log.CloseAndFlush();
+}

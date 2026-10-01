@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Common.Exceptions;
+using Microsoft.Extensions.Logging;
 
 namespace Modules.Baskets.Infrastructure.Service
 {
@@ -16,11 +17,13 @@ namespace Modules.Baskets.Infrastructure.Service
     
         private readonly BasketDbContext _basketDbContext;
         private readonly IProductModuleService _productModuleService;
+        private readonly ILogger<BasketModuleService> _logger;
 
-        public BasketModuleService(BasketDbContext basketdbcontext, IProductModuleService productModuleService)
+        public BasketModuleService(BasketDbContext basketdbcontext, IProductModuleService productModuleService, ILogger<BasketModuleService>     logger  )
         {
             _basketDbContext = basketdbcontext;
             _productModuleService = productModuleService;
+            _logger = logger;
         }
 
         public async Task AddItemToBasketAsync(string userId, RequestBasketItem requestBasketItem)
@@ -51,6 +54,10 @@ namespace Modules.Baskets.Infrastructure.Service
             }
 
             await _basketDbContext.SaveChangesAsync();
+            _logger.LogInformation
+                ("Basket item added. UserId: {UserId}, ProductId: {ProductId}, Quantity: {Quantity}",
+                userId, requestBasketItem.ProductId, requestBasketItem.Quantity
+                );
         }
 
         public async Task<List<BasketItemDtos>> GetBasketAsync(string userId)
