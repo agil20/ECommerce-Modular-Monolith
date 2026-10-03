@@ -154,9 +154,9 @@ var app = builder.Build();
 await IdentitySeeder.SeedAsync(app.Services);
 
 app.UseExceptionHandler();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+    app.UseSerilogRequestLogging();
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(c =>

@@ -430,3 +430,6 @@ FodyWeavers.xsd
 
 # Local secrets (connection strings, RabbitMQ, JWT key)
 appsettings.Development.json
+
+# Serilog log fayllari - lokalda yaranir, repoya getmir
+logs/
