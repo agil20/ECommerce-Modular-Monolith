@@ -150,11 +150,10 @@ builder.Services.AddMassTransit(x =>
     });
 });
 var app = builder.Build();
-
 await IdentitySeeder.SeedAsync(app.Services);
-
-app.UseExceptionHandler();
     app.UseSerilogRequestLogging();
+    app.UseExceptionHandler();
+
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
 {
@@ -170,11 +169,7 @@ app.UseExceptionHandler();
         c.EnablePersistAuthorization();
     });
 }
-
-
 app.UseHttpsRedirection();
-
-
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
