@@ -1,6 +1,7 @@
 using Common.Authorization;
 using Common.Exceptions;
 using ECommerceApi.Filters;
+using ECommerceApi.Logging;
 using ECommerceApi.Middleware;
 using FluentValidation;
 using MassTransit;
@@ -14,6 +15,7 @@ using Modules.Categories.Extentions;
 using Modules.Categories.Infrastructure.Persistence;
 using Modules.Categories.Validators;
 using Modules.Identity.Contracts.Services;
+using Modules.Identity.Domain;
 using Modules.Identity.Extentions;
 using Modules.Identity.Infrastructure.Persistence;
 using Modules.Identity.Infrastructure.Service;
@@ -32,12 +34,14 @@ Log.Logger = new LoggerConfiguration()
 try
 {
     var builder = WebApplication.CreateBuilder(args);
-// Serilog-u hosting pipeline-ına qoşuruq: bundan sonra ILogger<T>-ə yazılan hər şey Serilog-dan keçir
-// Butun Serilog ayarlari appsettings.json-dakı "Serilog" bolmesinden oxunur
-builder.Host.UseSerilog((context, configuration) => configuration
-    .ReadFrom.Configuration(context.Configuration));
+    // Serilog-u hosting pipeline-ına qoşuruq: bundan sonra ILogger<T>-ə yazılan hər şey Serilog-dan keçir
+    // Butun Serilog ayarlari appsettings.json-dakı "Serilog" bolmesinden oxunur
+    builder.Host.UseSerilog((context, configuration) => configuration
+       .ReadFrom.Configuration(context.Configuration)
+       .Destructure.ByTransforming<ApplicationUser>(u => new { u.Id, u.UserName })
+       .Destructure.With<SensitiveDataPolicy>());
 
-builder.Services.AddExceptionHandler<GlobalException>();
+    builder.Services.AddExceptionHandler<GlobalException>();
 builder.Services.AddProblemDetails();
 builder.Services.AddIdentityModule();
 builder.Services.AddControllers(options =>
